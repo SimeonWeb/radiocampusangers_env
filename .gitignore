@@ -1,0 +1,11 @@
+# WordPress : le thème a son propre dépôt, le reste vient de l'hébergement
+wordpress/*
+
+# Secrets et données locales
+.env
+*.sql
+
+# Dépendances du build des assets
+node_modules/
+
+.DS_Store

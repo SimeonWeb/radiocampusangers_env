@@ -1,0 +1,24 @@
+{
+  "name": "campus-v6",
+  "version": "6.3.1",
+  "private": true,
+  "type": "module",
+  "description": "Build des assets du thème Campus V6 (SCSS → CSS, JS → .min.js)",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "browserslist": [
+    "defaults"
+  ],
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "chokidar": "^4.0.3",
+    "postcss": "^8.5.6",
+    "sass": "^1.93.0",
+    "terser": "^5.44.0"
+  }
+}
