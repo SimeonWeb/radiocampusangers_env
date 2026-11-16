@@ -4,13 +4,10 @@ WordPress en local avec Docker : Apache + PHP 8.4 (`web`) et MySQL 8.0 (`db`), c
 
 ## Prérequis
 
-Ajouter dans `/etc/hosts` :
+Ajouter le projet WordPress dans le dossier `wordpress/`.
 
-```
-127.0.0.1 www.radiocampusangers.gks
-```
-
-Ajouter le projet wordpress dans le dossier `wordpress/`
+Le `wordpress/wp-config.php` local construit `WP_HOME` / `WP_SITEURL` à partir de l'hôte appelé
+(`$_SERVER['HTTP_HOST']`) : c'est une config de développement, à ne pas déployer sur l'hébergement.
 
 ## Démarrage
 
@@ -18,7 +15,7 @@ Ajouter le projet wordpress dans le dossier `wordpress/`
 docker compose up -d --build
 ```
 
-Site : http://www.radiocampusangers.gks
+Site : **http://localhost:3000** (avec hot reload, voir plus bas) ou http://localhost (Apache direct, sans hot reload).
 
 ## Assets du thème (SCSS, JS)
 
@@ -35,6 +32,15 @@ docker compose exec node yarn build
 ```
 
 Logs du watch : `docker compose logs -f node`.
+
+### Hot reload
+
+Naviguer sur **http://localhost:3000** (proxy BrowserSync devant le site) :
+
+- CSS régénéré : injection à chaud, sans rechargement de la page ;
+- JS ou PHP du thème modifié : rechargement de la page.
+
+### Où est la configuration
 
 Tout l'outillage est dans `docker/node/` (`build.mjs`, `package.json`, `yarn.lock`) : le thème ne contient
 que les sources et les fichiers générés. La liste des fichiers compilés est dans `build.mjs` ;

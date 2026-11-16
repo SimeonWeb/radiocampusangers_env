@@ -18,6 +18,8 @@ services:
     working_dir: /app
     environment:
       THEME_DIR: /theme
+    ports:
+      - "3000:3000"
     volumes:
       - ./docker/node:/app
       - ./wordpress/wp-content/themes/campus_v6:/theme

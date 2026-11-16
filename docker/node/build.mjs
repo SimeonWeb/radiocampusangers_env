@@ -129,8 +129,31 @@ const { default: chokidar } = await import('chokidar');
 
 console.log('\nSurveillance des fichiers… (Ctrl+C pour arrêter)\n');
 
+// Hot reload : BrowserSync en proxy devant le site WordPress, accessible sur http://localhost:3000
+// - CSS régénéré    → injection à chaud, sans rechargement de la page
+// - JS / PHP modifié → rechargement de la page
+// WordPress construit ses URLs à partir de l'hôte appelé (voir wp-config.php), on transmet donc l'hôte d'origine.
+const { default: browserSync } = await import('browser-sync');
+const bs = browserSync.create();
+bs.init({
+	proxy: {
+		target: process.env.PROXY_TARGET ?? 'http://web',
+		proxyReq: [(proxyReq, req) => proxyReq.setHeader('Host', req.headers.host)],
+	},
+	port: 3000,
+	open: false,
+	ui: false,
+	notify: false,
+	ghostMode: false,
+	logLevel: 'warn',
+});
+console.log('Hot reload : http://localhost:3000\n');
+
+const cssOutputs = scssEntries.map((entry) => path.basename(entry).replace(/\.scss$/, '.css'));
+
 // Debounce : une sauvegarde peut émettre plusieurs évènements
 let scssTimer;
+let phpTimer;
 const pendingJs = new Set();
 let jsTimer;
 
@@ -145,14 +168,20 @@ chokidar
 		const file = path.relative(root, absolute);
 		if (file.endsWith('.scss')) {
 			clearTimeout(scssTimer);
-			scssTimer = setTimeout(buildAllScss, 100);
+			scssTimer = setTimeout(async () => {
+				if (await buildAllScss()) bs.reload(cssOutputs);
+			}, 100);
 		} else if (jsEntries.includes(file.split(path.sep).join('/'))) {
 			pendingJs.add(file);
 			clearTimeout(jsTimer);
-			jsTimer = setTimeout(() => {
+			jsTimer = setTimeout(async () => {
 				const files = [...pendingJs];
 				pendingJs.clear();
-				files.forEach((f) => safely(() => buildJs(f), f));
+				const results = await Promise.all(files.map((f) => safely(() => buildJs(f), f)));
+				if (results.every(Boolean)) bs.reload();
 			}, 100);
+		} else if (file.endsWith('.php')) {
+			clearTimeout(phpTimer);
+			phpTimer = setTimeout(() => bs.reload(), 100);
 		}
 	});
